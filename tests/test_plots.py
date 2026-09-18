@@ -23,8 +23,10 @@ def _result_with_curves():
 def test_render_plots_from_json_only(tmp_path):
     result = _result_with_curves()
     paths = render_plots(result, tmp_path)
-    assert paths == {"Lthal": "plots/thalamus.png", "Rthal": "plots/thalamus.png"}
-    png = tmp_path / "plots" / "thalamus.png"
-    assert png.is_file() and png.stat().st_size > 10_000
-    assert result["regions"][0]["plot"] == "plots/thalamus.png"
-    validate_result(result)     # the added "plot" key is allowed by the schema
+    assert paths == {"Lthal": "plots/thalamus-left.png", "Rthal": "plots/thalamus-right.png"}
+    for name in ("thalamus-left.png", "thalamus-right.png", "legend.png"):
+        png = tmp_path / "plots" / name
+        assert png.is_file() and png.stat().st_size > 5_000
+    assert result["regions"][0]["plot"] == "plots/thalamus-left.png"
+    assert result["legend_plot"] == "plots/legend.png"
+    validate_result(result)     # the added "plot" / "legend_plot" keys are allowed by the schema

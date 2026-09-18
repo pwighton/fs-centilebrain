@@ -78,6 +78,7 @@
         }
       }
     },
+    "legend_plot": {"type": "string"},
     "curve_settings": {
       "type": ["object", "null"],
       "required": ["age_window_requested", "age_window_used", "step_years", "icv_fixed_mm3"],
