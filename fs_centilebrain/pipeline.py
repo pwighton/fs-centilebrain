@@ -14,6 +14,7 @@ from .curves import compute_curves
 from .freesurfer import freesurfer_version, parse_aseg_stats, read_build_stamp, recon_all_done
 from .inputs import build_input_row, write_input_files
 from .measures import MEASURE_SPECS
+from .plots import render_plots
 from .results import (build_result, model_block, provenance, region_entries, result_filename,
                       write_result)
 from .scoring import SEX_NAME, load_offsets, model_path, score_cases, write_website_format
@@ -121,9 +122,12 @@ def run_pipeline(args: argparse.Namespace) -> int:
                   (settings["age_window_requested"][1] - settings["age_window_requested"][0]) / 2,
                   *settings["age_window_used"]))
 
+    # --- Step 5: plots ------------------------------------------------------------
+    render_plots(result, output_dir)
+
     result_path = output_dir / result_filename(spec)
     write_result(result, result_path)
     log.info("wrote %s", result_path)
 
-    log.error("plots are not implemented yet (Step 5)")
+    log.error("the PDF report is not implemented yet (Step 6)")
     return 3
