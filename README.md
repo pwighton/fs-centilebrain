@@ -37,8 +37,8 @@ Notes:
 - `--user $(id -u):$(id -g)` makes the output files belong to you rather than root.
 - The subject directory needs `stats/aseg.stats`; `scripts/build-stamp.txt` and `scripts/recon-all.done`
   are read if present (for the FreeSurfer version and a completeness check).
-- Timestamps in the log and report are in the container's time zone, UTC by default. Add
-  `-e TZ=America/New_York` (or your zone) to the `docker run` line for local time.
+- Timestamps in the log and report use the container's time zone, `America/New_York` by default.
+  Override with `-e TZ=<zone>` on the `docker run` line (e.g. `-e TZ=UTC`).
 - Re-running on the same subject overwrites the previous `centilebrain/` outputs; the log describes the latest run only.
 
 Exit codes: `0` success, `1` unexpected error (traceback in `centilebrain.log`), `2` usage or input error.

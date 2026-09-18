@@ -38,6 +38,9 @@ WORKDIR /opt/centilebrain/src
 # directory inside the image; point matplotlib's cache somewhere writable.
 ENV MPLCONFIGDIR=/tmp/matplotlib
 
+# Time zone for log and report timestamps; override with `docker run -e TZ=...`
+ENV TZ=America/New_York
+
 # Provenance: set by the Makefile at build time
 ARG GIT_SHA=unknown
 ARG IMAGE_TAG=pwighton/fs-centilebrain:dev
