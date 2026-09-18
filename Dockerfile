@@ -34,5 +34,11 @@ COPY tests /opt/centilebrain/src/tests
 COPY reference /opt/centilebrain/src/reference
 WORKDIR /opt/centilebrain/src
 
+# Provenance: set by the Makefile at build time
+ARG GIT_SHA=unknown
+ARG IMAGE_TAG=pwighton/fs-centilebrain:dev
+ENV FS_CENTILEBRAIN_GIT_SHA=${GIT_SHA} \
+    FS_CENTILEBRAIN_IMAGE=${IMAGE_TAG}
+
 ENTRYPOINT ["fs-centilebrain"]
 CMD ["--help"]

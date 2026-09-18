@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "fs-centilebrain result",
+  "type": "object",
+  "required": ["schema_version", "measure", "subject", "model", "regions", "curve_settings", "warnings", "notes", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "measure": {"type": "string"},
+    "subject": {
+      "type": "object",
+      "required": ["id", "sex", "age", "icv_mm3", "vendor", "freesurfer_version", "freesurfer_build_stamp", "subject_dir", "recon_all_done"],
+      "properties": {
+        "id": {"type": "string"},
+        "sex": {"enum": ["M", "F"]},
+        "age": {"type": "number", "exclusiveMinimum": 0},
+        "icv_mm3": {"type": "number"},
+        "vendor": {"type": "string"},
+        "freesurfer_version": {"type": "string"},
+        "freesurfer_build_stamp": {"type": ["string", "null"]},
+        "subject_dir": {"type": "string"},
+        "recon_all_done": {"type": "boolean"}
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["family", "upstream_repo", "upstream_commit", "model_file", "model_sha256", "offsets_source", "offsets_exact",
+                   "training_age_range", "training_fs_versions", "percentile_method", "band_percentiles", "band_z"],
+      "properties": {
+        "family": {"type": "string"},
+        "description": {"type": "string"},
+        "upstream_repo": {"type": "string"},
+        "upstream_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "model_file": {"type": "string"},
+        "model_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "offsets_source": {"type": "string"},
+        "offsets_exact": {"type": "boolean"},
+        "training_age_range": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+        "training_fs_versions": {"type": "array", "items": {"type": "string"}},
+        "percentile_method": {"enum": ["gaussian", "empirical"]},
+        "band_percentiles": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+        "band_z": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}
+      }
+    },
+    "regions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["region", "hemi", "structure", "label", "volume_mm3", "predicted_mm3", "p10_mm3", "p50_mm3", "p90_mm3",
+                     "rmse_mm3", "z", "percentile", "percentile_empirical", "flag"],
+        "properties": {
+          "region": {"type": "string"},
+          "hemi": {"enum": ["L", "R"]},
+          "structure": {"type": "string"},
+          "label": {"type": "string"},
+          "volume_mm3": {"type": "number"},
+          "predicted_mm3": {"type": "number"},
+          "p10_mm3": {"type": "number"},
+          "p50_mm3": {"type": "number"},
+          "p90_mm3": {"type": "number"},
+          "rmse_mm3": {"type": "number", "exclusiveMinimum": 0},
+          "z": {"type": "number"},
+          "percentile": {"type": "number", "minimum": 0, "maximum": 100},
+          "percentile_empirical": {"type": "number", "minimum": 0, "maximum": 100},
+          "flag": {"enum": ["low", "within", "high"]},
+          "curve": {
+            "type": "object",
+            "required": ["age", "p10", "p50", "p90"],
+            "properties": {
+              "age": {"type": "array", "items": {"type": "number"}},
+              "p10": {"type": "array", "items": {"type": "number"}},
+              "p50": {"type": "array", "items": {"type": "number"}},
+              "p90": {"type": "array", "items": {"type": "number"}}
+            }
+          },
+          "plot": {"type": "string"}
+        }
+      }
+    },
+    "curve_settings": {
+      "type": ["object", "null"],
+      "required": ["age_window_requested", "age_window_used", "step_years", "icv_fixed_mm3"],
+      "properties": {
+        "age_window_requested": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+        "age_window_used": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+        "step_years": {"type": "number", "exclusiveMinimum": 0},
+        "icv_fixed_mm3": {"type": "number"}
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {"code": {"type": "string"}, "message": {"type": "string"}}
+      }
+    },
+    "notes": {
+      "type": "object",
+      "required": ["expected_flags_healthy", "research_use_only"],
+      "properties": {
+        "expected_flags_healthy": {"type": "number"},
+        "research_use_only": {"const": true}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["tool", "tool_version", "run_timestamp", "cli_args", "python_version", "r_version", "packages"],
+      "properties": {
+        "tool": {"const": "fs-centilebrain"},
+        "tool_version": {"type": "string"},
+        "tool_git_sha": {"type": ["string", "null"]},
+        "container_image": {"type": ["string", "null"]},
+        "run_timestamp": {"type": "string"},
+        "cli_args": {"type": "object"},
+        "python_version": {"type": "string"},
+        "python_executable": {"type": "string"},
+        "r_version": {"type": "string"},
+        "packages": {"type": "object"}
+      }
+    }
+  }
+}
