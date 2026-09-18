@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Download the CentileBrain model files listed in models/checksums.sha256 from the
+# Download the CentileBrain model files listed in fs_centilebrain/data/model-checksums.sha256 from the
 # pinned upstream commit and verify their checksums. Used by the Dockerfile; can
 # also be run locally:  tools/fetch_models.sh /path/to/model/dir
 set -euo pipefail
@@ -8,7 +8,7 @@ UPSTREAM_REPO="CentileBrain/centilebrain"
 UPSTREAM_COMMIT="a532b6ff89ccd5fba3846b77b13a175fb9283c68"
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-checksums="${here}/../models/checksums.sha256"
+checksums="${here}/../fs_centilebrain/data/model-checksums.sha256"
 dest="${1:?usage: fetch_models.sh DEST_DIR}"
 
 mkdir -p "${dest}"

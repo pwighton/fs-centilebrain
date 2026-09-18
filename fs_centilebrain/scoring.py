@@ -1,6 +1,7 @@
 """Run the R scoring script on a table of cases and return tidy results."""
 
 import csv
+import hashlib
 import subprocess
 import tempfile
 from importlib import resources
@@ -40,6 +41,36 @@ def model_path(spec: MeasureSpec, sex: str, model_dir: Path) -> Path:
     if not path.is_file():
         raise ScoringError(f"model file not found: {path}")
     return path
+
+
+def expected_checksums() -> dict:
+    """{file name: sha256} for the upstream model files, from the package's checksum list."""
+    out = {}
+    for line in _package_file("data", "model-checksums.sha256").read_text().splitlines():
+        if line.strip():
+            digest, name = line.split()
+            out[name] = digest
+    return out
+
+
+def sha256_of(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def verify_model_checksum(model_file: Path):
+    """None if the file matches the pinned upstream checksum, otherwise a message."""
+    expected = expected_checksums().get(model_file.name)
+    if expected is None:
+        return f"no pinned checksum for {model_file.name}"
+    actual = sha256_of(model_file)
+    if actual != expected:
+        return (f"{model_file.name} does not match the pinned upstream file "
+                f"(sha256 {actual[:12]}… vs expected {expected[:12]}…); results may differ from centilebrain.org")
+    return None
 
 
 def gaussian_percentile(z: float) -> float:

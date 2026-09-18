@@ -5,10 +5,13 @@ Stages are added step by step; see 20260917-fs-centilebrains-implementation.md.
 
 import argparse
 import logging
+import os
 import re
 
 import pandas as pd
 
+from . import __version__
+from .cli_errors import CliError
 from .config import OUTPUT_DIRNAME, TRAINING_AGE_RANGE, TRAINING_FS_VERSIONS
 from .curves import compute_curves
 from .freesurfer import freesurfer_version, parse_aseg_stats, read_build_stamp, recon_all_done
@@ -18,7 +21,8 @@ from .plots import render_plots
 from .report import render_report
 from .results import (build_result, model_block, provenance, region_entries, result_filename,
                       write_result)
-from .scoring import SEX_NAME, load_offsets, model_path, score_cases, write_website_format
+from .scoring import (SEX_NAME, load_offsets, model_path, score_cases, verify_model_checksum,
+                      write_website_format)
 
 log = logging.getLogger("fs_centilebrain")
 
@@ -49,24 +53,54 @@ def input_warnings(subject_path, fs_version: str, sex: str, age: float) -> list:
     return warnings
 
 
-def run_pipeline(args: argparse.Namespace) -> int:
-    subject_path = args.subject_dir / args.subject
+def prepare_output_dirs(subject_path):
+    """Create <subject>/centilebrain/{input,output}; returns (out_root, input_dir, output_dir, existed)."""
     out_root = subject_path / OUTPUT_DIRNAME
+    existed = out_root.exists()
     input_dir = out_root / "input"
     output_dir = out_root / "output"
-    for d in (out_root, input_dir, output_dir):
-        d.mkdir(exist_ok=True)
+    try:
+        for d in (out_root, input_dir, output_dir):
+            d.mkdir(exist_ok=True)
+        probe = output_dir / ".write-test"
+        probe.touch()
+        probe.unlink()
+    except PermissionError as exc:
+        raise CliError(f"cannot write to {out_root} (running as uid {os.getuid()}): {exc}") from exc
+    return out_root, input_dir, output_dir, existed
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
-        handlers=[logging.StreamHandler(), logging.FileHandler(output_dir / "centilebrain.log")],
-    )
-    log.info("fs-centilebrain run: subject=%s sex=%s age=%.2f vendor=%s measure=%s",
-             args.subject, args.sex, args.age, args.vendor, args.measure)
+
+def configure_logging(log_file) -> None:
+    """Console + per-run log file (truncated, so it describes only this run)."""
+    root = logging.getLogger()
+    for handler in list(root.handlers):
+        root.removeHandler(handler)
+        handler.close()
+    root.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    for handler in (logging.StreamHandler(), logging.FileHandler(log_file, mode="w")):
+        handler.setFormatter(formatter)
+        root.addHandler(handler)
+    quiet_third_party_loggers()
+
+
+def quiet_third_party_loggers() -> None:
+    logging.getLogger("fontTools").setLevel(logging.WARNING)      # "name pruned" chatter during font subsetting
+    logging.getLogger("weasyprint").setLevel(logging.ERROR)       # HarfBuzz-Subset deprecation notice on Ubuntu 22.04
+
+
+def run_pipeline(args: argparse.Namespace) -> int:
+    subject_path = args.subject_dir / args.subject
+    out_root, input_dir, output_dir, existed = prepare_output_dirs(subject_path)
+    configure_logging(output_dir / "centilebrain.log")
+
+    log.info("fs-centilebrain %s run: subject=%s sex=%s age=%.2f vendor=%s measure=%s",
+             __version__, args.subject, args.sex, args.age, args.vendor, args.measure)
     log.info("subject dir: %s", subject_path)
     log.info("model dir:   %s", args.model_dir)
     log.info("output dir:  %s", out_root)
+    if existed:
+        log.info("%s already exists; its contents will be overwritten", out_root)
 
     spec = MEASURE_SPECS[args.measure]
 
@@ -87,6 +121,9 @@ def run_pipeline(args: argparse.Namespace) -> int:
     # --- Step 3: model scoring ----------------------------------------------------
     offsets = load_offsets(spec, args.sex)
     model_file = model_path(spec, args.sex, args.model_dir)
+    checksum_problem = verify_model_checksum(model_file)
+    if checksum_problem:
+        _warn(warnings, "MODEL_CHECKSUM_MISMATCH", checksum_problem)
     cases = pd.DataFrame([row])
     scored = score_cases(cases, spec, args.sex, args.model_dir)
     pred_path, z_path = write_website_format(cases, scored, spec, args.sex, output_dir)

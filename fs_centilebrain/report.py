@@ -80,7 +80,8 @@ def render_report(result_path: Path, pdf_path: Path = None) -> Path:
     base URL for both the HTML and the PDF.
     """
     from weasyprint import HTML  # imported lazily: slow, and not needed by the rest of the package
-    logging.getLogger("fontTools").setLevel(logging.WARNING)   # silence "name pruned" chatter during font subsetting
+    logging.getLogger("fontTools").setLevel(logging.WARNING)   # "name pruned" chatter during font subsetting
+    logging.getLogger("weasyprint").setLevel(logging.ERROR)    # HarfBuzz-Subset deprecation notice on Ubuntu 22.04
 
     result_path = Path(result_path)
     result = read_result(result_path)

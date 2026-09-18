@@ -1,7 +1,6 @@
 # Upstream model files are downloaded at image build, never committed
-# (models/checksums.sha256 is tracked)
+# (the checksum list lives in fs_centilebrain/data/model-checksums.sha256)
 *.rds
-models/UPSTREAM_COMMIT
 
 # Python
 __pycache__/

@@ -9,17 +9,19 @@ The first form is the default; ``run`` may be given explicitly.
 """
 
 import argparse
+import logging
 import sys
 from pathlib import Path
 
 from . import __version__
+from .cli_errors import CliError
 from .config import DEFAULT_MEASURE, DEFAULT_VENDOR, MEASURES, MODEL_DIR, VENDORS
 
 SUBCOMMANDS = ("run", "report")
 
-
-class CliError(Exception):
-    """A usage or input error that should be reported without a traceback."""
+# Exit codes: 0 success, 1 unexpected error (traceback in the log), 2 usage/input error.
+EXIT_UNEXPECTED = 1
+EXIT_USAGE = 2
 
 
 def _positive_float(text: str) -> float:
@@ -87,22 +89,32 @@ def validate_run_args(args: argparse.Namespace) -> None:
 
 def main(argv=None) -> int:
     args = parse_args(argv)
+    log = logging.getLogger("fs_centilebrain")
     try:
         if args.command == "report":
             if not args.result_json.is_file():
                 raise CliError(f"result JSON not found: {args.result_json}")
-            import logging
-
             from .report import render_report
             logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
             render_report(args.result_json, args.output)
             return 0
         validate_run_args(args)
+        from .freesurfer import FreeSurferError
         from .pipeline import run_pipeline
-        return run_pipeline(args)
+        from .scoring import ScoringError
+        try:
+            return run_pipeline(args)
+        except (FreeSurferError, ScoringError) as exc:
+            # Problems with the subject's files or the model inputs: report as an input error.
+            log.error("%s", exc)
+            raise CliError(str(exc)) from exc
     except CliError as exc:
         print(f"fs-centilebrain: error: {exc}", file=sys.stderr)
-        return 2
+        return EXIT_USAGE
+    except Exception as exc:  # noqa: BLE001 - last resort: traceback to the log, one line to the user
+        log.exception("unexpected error")
+        print(f"fs-centilebrain: unexpected error: {exc!r} (see centilebrain.log for the traceback)", file=sys.stderr)
+        return EXIT_UNEXPECTED
 
 
 if __name__ == "__main__":

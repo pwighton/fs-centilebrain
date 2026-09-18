@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # CentileBrain model files: fetched from the pinned upstream commit, checksum-verified.
 ENV FS_CENTILEBRAIN_MODEL_DIR=/opt/centilebrain/models
-COPY models/checksums.sha256 /opt/centilebrain/src/models/checksums.sha256
+COPY fs_centilebrain/data/model-checksums.sha256 /opt/centilebrain/src/fs_centilebrain/data/model-checksums.sha256
 COPY tools/fetch_models.sh /opt/centilebrain/src/tools/fetch_models.sh
 RUN bash /opt/centilebrain/src/tools/fetch_models.sh "${FS_CENTILEBRAIN_MODEL_DIR}"
 
@@ -33,6 +33,10 @@ RUN pip install --no-cache-dir /opt/centilebrain/src[dev]
 COPY tests /opt/centilebrain/src/tests
 COPY reference /opt/centilebrain/src/reference
 WORKDIR /opt/centilebrain/src
+
+# The container is normally run as the calling user (--user $(id -u):$(id -g)), who has no home
+# directory inside the image; point matplotlib's cache somewhere writable.
+ENV MPLCONFIGDIR=/tmp/matplotlib
 
 # Provenance: set by the Makefile at build time
 ARG GIT_SHA=unknown
