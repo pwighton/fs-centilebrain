@@ -41,29 +41,40 @@ Notes:
   Override with `-e TZ=<zone>` on the `docker run` line (e.g. `-e TZ=UTC`).
 - Re-running on the same subject overwrites the previous `centilebrain/` outputs; the log describes the latest run only.
 
-Exit codes: `0` success, `1` unexpected error (traceback in `centilebrain.log`), `2` usage or input error.
+Exit codes: 
+
+- `0`: success 
+- `1`: unexpected error (traceback in `centilebrain.log`)
+- `2`: usage or input error
 
 ## Outputs
 
 Everything is written to `<subject-dir>/<subject>/centilebrain/`:
 
-```
-input/centilebrain-input-subcortical.csv     values extracted from aseg.stats
-input/centilebrain-input-subcortical.xlsx    same, in the format accepted by centilebrain.org
-output/centilebrain-subcortical.json         all results (z, percentiles, asymmetry, curves, warnings, provenance)
-output/prediction_SubcorticalVolume_<sex>.csv, zscore_SubcorticalVolume_<sex>.csv   website-format
-output/plots/<structure>-<left|right>.png, output/plots/legend.png
-output/normative-neuromorphometry-report--subject-<subject>.html              same content as the PDF
-output/centilebrain.log
-normative-neuromorphometry-report--subject-<subject>.pdf
-```
+- `input/`
+  - `centilebrain-input-subcortical.csv`: values extracted from aseg.stats
+  - `centilebrain-input-subcortical.xlsx`: same values but in the format accepted by centilebrain.org
+- `output/`
+  - `normative-neuromorphometry-report--subject-<subject>.pdf`: the neuromorphometry report; the penultimate output
+  - `normative-neuromorphometry-report--subject-<subject>.html`: same content as the PDF
+  - `centilebrain-subcortical.json`: all results required to generate the report
+  - `prediction_SubcorticalVolume_<sex>.csv`: results in website's format
+  - `zscore_SubcorticalVolume_<sex>.csv`: results in website's format
+  - `plots/<structure>-<left|right>.png`: output plots 
+  - `plots/legend.png`: legend for plots
+  - `centilebrain.log`: log file
 
 The PDF is rendered from `output/centilebrain-subcortical.json` alone, so it can be regenerated
 (for example after a layout change) without re-running the model:
 
 ```
-docker run --rm --user $(id -u):$(id -g) -v /path/to/subjects:/subjects pwighton/fs-centilebrain:latest \
-  report /subjects/bert/centilebrain/output/centilebrain-subcortical.json
+docker run \
+  --rm \
+  --user $(id -u):$(id -g) \
+  -v /path/to/subjects:/subjects \
+  pwighton/fs-centilebrain:latest \
+    report \
+    /subjects/bert/centilebrain/output/centilebrain-subcortical.json
 ```
 
 ### The report
@@ -134,8 +145,7 @@ on the `PATH` and the model files must be fetched with `tools/fetch_models.sh DI
 
 The CentileBrain model files (`.rds`) are downloaded at image build time from a pinned commit of
 https://github.com/CentileBrain/centilebrain and verified against `fs_centilebrain/data/model-checksums.sha256`
-(again at run time, producing a warning on mismatch). They are not redistributed in this repository
-(upstream publishes no license).
+(again at run time, producing a warning on mismatch). They are not redistributed in this repository.
 
 The models were trained on mean-centered data whose means are not published; the equivalent per-region
 offsets in `fs_centilebrain/data/offsets-subcortical.csv` were derived from single-site website runs of the
