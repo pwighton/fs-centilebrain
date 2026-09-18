@@ -22,6 +22,20 @@ def _minimal_result():
     return build_result(SUBCORTICAL, subject, model, regions, [], prov)
 
 
+def test_asymmetry_index():
+    from fs_centilebrain.results import asymmetry_entries, asymmetry_index
+
+    assert asymmetry_index(1000.0, 1000.0) == 0.0
+    assert asymmetry_index(1100.0, 900.0) == pytest.approx(20.0)      # 200 * 200 / 2000
+    assert asymmetry_index(900.0, 1100.0) == pytest.approx(-20.0)     # negative when right is larger
+    regions = _minimal_result()["regions"]
+    assert asymmetry_entries(regions) == []                           # left only: no pair
+    right = dict(regions[0], region="Rthal", hemi="R", volume_mm3=7600.0)
+    (entry,) = asymmetry_entries(regions + [right])
+    assert entry["structure"] == "thalamus" and entry["left_region"] == "Lthal" and entry["right_region"] == "Rthal"
+    assert entry["ai_percent"] == pytest.approx(200 * (8000 - 7600) / (8000 + 7600))
+
+
 def test_result_validates_and_roundtrips(tmp_path):
     result = _minimal_result()
     validate_result(result)

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "fs-centilebrain result",
   "type": "object",
-  "required": ["schema_version", "measure", "subject", "model", "regions", "curve_settings", "warnings", "notes", "provenance"],
+  "required": ["schema_version", "measure", "subject", "model", "regions", "asymmetry", "curve_settings", "warnings", "notes", "provenance"],
   "additionalProperties": false,
   "properties": {
     "schema_version": {"const": 1},
@@ -75,6 +75,23 @@
             }
           },
           "plot": {"type": "string"}
+        }
+      }
+    },
+    "asymmetry": {
+      "type": "array",
+      "description": "Per structure with both sides: AI = 200 * (L - R) / (L + R), percent; positive = left larger",
+      "items": {
+        "type": "object",
+        "required": ["structure", "label", "left_region", "right_region", "left_mm3", "right_mm3", "ai_percent"],
+        "properties": {
+          "structure": {"type": "string"},
+          "label": {"type": "string"},
+          "left_region": {"type": "string"},
+          "right_region": {"type": "string"},
+          "left_mm3": {"type": "number"},
+          "right_mm3": {"type": "number"},
+          "ai_percent": {"type": "number"}
         }
       }
     },

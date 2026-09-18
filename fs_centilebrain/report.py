@@ -35,8 +35,11 @@ def _structures(result: dict) -> list:
     """Group regions into one row per structure with 'L' and 'R' entries."""
     rows = {}
     for entry in result["regions"]:
-        rows.setdefault(entry["structure"], {"label": entry["label"], "structure": entry["structure"]})
+        rows.setdefault(entry["structure"], {"label": entry["label"], "structure": entry["structure"], "ai": None})
         rows[entry["structure"]][entry["hemi"]] = entry
+    for a in result.get("asymmetry", []):
+        if a["structure"] in rows:
+            rows[a["structure"]]["ai"] = a["ai_percent"]
     return list(rows.values())
 
 

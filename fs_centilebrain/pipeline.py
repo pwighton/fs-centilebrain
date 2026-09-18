@@ -111,6 +111,8 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 for k, v in vars(args).items()}
     result = build_result(spec, subject, model_block(spec, args.sex, model_file, offsets), regions,
                           warnings, provenance(cli_args))
+    for a in result["asymmetry"]:
+        log.info("%-12s asymmetry index %+5.1f %%", a["label"], a["ai_percent"])
 
     # --- Step 4: age curves -------------------------------------------------------
     curves, settings = compute_curves(spec, args.sex, args.age, subject["icv_mm3"], args.model_dir)

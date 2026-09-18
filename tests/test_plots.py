@@ -15,6 +15,8 @@ def _result_with_curves():
     right = dict(left, region="Rthal", hemi="R", volume_mm3=6500.0, z=-1.9, percentile=2.9, flag="low",
                  curve=dict(left["curve"]))
     result["regions"].append(right)
+    from fs_centilebrain.results import asymmetry_entries
+    result["asymmetry"] = asymmetry_entries(result["regions"])
     result["curve_settings"] = {"age_window_requested": [30.0, 50.0], "age_window_used": [30.0, 50.0],
                                 "step_years": 0.25, "icv_fixed_mm3": 1.5e6}
     return result

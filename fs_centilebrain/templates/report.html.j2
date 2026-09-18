@@ -87,12 +87,14 @@
       <th class="name"></th>
       <th class="group side-l" colspan="5">Left (mm³)</th>
       <th class="group side-l" colspan="5">Right (mm³)</th>
+      <th class="group side-l">L–R</th>
     </tr>
     <tr>
       <th class="name">Structure</th>
       {% for side in ("L", "R") %}
       <th class="side-l">Volume</th><th>{{ band.mid }}th</th><th>{{ band.low }}th–{{ band.high }}th</th><th>z</th><th>Pctl</th>
       {% endfor %}
+      <th class="side-l">AI (%)</th>
     </tr>
   </thead>
   <tbody>
@@ -112,6 +114,7 @@
           <td class="side-l">–</td><td>–</td><td>–</td><td>–</td><td>–</td>
         {% endif %}
       {% endfor %}
+      <td class="side-l">{% if s.ai is not none %}{{ "%+.1f"|format(s.ai) }}{% else %}–{% endif %}</td>
     </tr>
   {% endfor %}
   </tbody>
@@ -126,6 +129,8 @@
   <li>The {{ band.mid }}th percentile is the volume the CentileBrain model predicts for a healthy {{ sex_word }} of this age with this intracranial volume.
       The {{ band.low }}th–{{ band.high }}th range is the model's Gaussian band around it (z = ±{{ "%.2f"|format(model.band_z[2]) }}).</li>
   <li>z is the deviation from the prediction in units of the model's residual standard deviation; the percentile is 100·Φ(z).</li>
+  <li>AI is the left–right asymmetry index, 100·(L−R)/mean(L,R): the volume difference as a percent of the two sides' mean,
+      positive when the left is larger. It is computed from the measured volumes only; CentileBrain provides no normative range for it.</li>
   <li>The curves on the following pages hold intracranial volume fixed at the subject's value over the age window
       {% if curve_settings %}{{ "%.0f"|format(curve_settings.age_window_used[0]) }}–{{ "%.0f"|format(curve_settings.age_window_used[1]) }} years{% endif %}.
       Intracranial volume is roughly stable in adulthood, less so in childhood.</li>

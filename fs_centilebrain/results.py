@@ -122,6 +122,33 @@ def region_entries(spec: MeasureSpec, row: dict, scored) -> list:
     return entries
 
 
+def asymmetry_index(left_mm3: float, right_mm3: float) -> float:
+    """AI = 100 * (L - R) / ((L + R) / 2): percent difference relative to the mean of the two
+    sides; positive when the left is larger. The convention used by NeuroQuant."""
+    return 200.0 * (left_mm3 - right_mm3) / (left_mm3 + right_mm3)
+
+
+def asymmetry_entries(regions: list) -> list:
+    """One entry per structure that has both a left and a right region."""
+    by_structure = {}
+    for entry in regions:
+        by_structure.setdefault(entry["structure"], {})[entry["hemi"]] = entry
+    out = []
+    for structure, sides in by_structure.items():
+        if "L" in sides and "R" in sides:
+            left, right = sides["L"], sides["R"]
+            out.append({
+                "structure": structure,
+                "label": left["label"],
+                "left_region": left["region"],
+                "right_region": right["region"],
+                "left_mm3": left["volume_mm3"],
+                "right_mm3": right["volume_mm3"],
+                "ai_percent": asymmetry_index(left["volume_mm3"], right["volume_mm3"]),
+            })
+    return out
+
+
 def build_result(spec: MeasureSpec, subject: dict, model: dict, regions: list, warnings: list,
                  prov: dict) -> dict:
     n_regions = len(regions)
@@ -132,6 +159,7 @@ def build_result(spec: MeasureSpec, subject: dict, model: dict, regions: list, w
         "subject": subject,
         "model": model,
         "regions": regions,
+        "asymmetry": asymmetry_entries(regions),
         "curve_settings": None,          # filled in Step 4
         "warnings": warnings,
         "notes": {

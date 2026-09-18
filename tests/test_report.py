@@ -30,6 +30,7 @@ def test_html_contains_table_values_and_flags():
     assert "79th" in html and "3rd" in html                # percentiles
     assert 'class="side-l low"' in html and "↓" in html    # right thalamus flagged low
     assert "1 of 2 regions flagged" in html
+    assert "+20.7" in html                                 # AI = 200*(8000-6500)/(14500)
     ctx = build_context(result)
     assert [s["label"] for s in ctx["structures"]] == ["Thalamus"]
     assert ctx["structures"][0]["L"]["region"] == "Lthal" and ctx["structures"][0]["R"]["region"] == "Rthal"
