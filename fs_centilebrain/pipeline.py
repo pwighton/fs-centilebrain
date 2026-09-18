@@ -10,6 +10,7 @@ import re
 import pandas as pd
 
 from .config import OUTPUT_DIRNAME, TRAINING_AGE_RANGE, TRAINING_FS_VERSIONS
+from .curves import compute_curves
 from .freesurfer import freesurfer_version, parse_aseg_stats, read_build_stamp, recon_all_done
 from .inputs import build_input_row, write_input_files
 from .measures import MEASURE_SPECS
@@ -108,9 +109,21 @@ def run_pipeline(args: argparse.Namespace) -> int:
                 for k, v in vars(args).items()}
     result = build_result(spec, subject, model_block(spec, args.sex, model_file, offsets), regions,
                           warnings, provenance(cli_args))
+
+    # --- Step 4: age curves -------------------------------------------------------
+    curves, settings = compute_curves(spec, args.sex, args.age, subject["icv_mm3"], args.model_dir)
+    for entry in result["regions"]:
+        entry["curve"] = curves[entry["region"]]
+    result["curve_settings"] = settings
+    if settings["age_window_used"] != settings["age_window_requested"]:
+        _warn(warnings, "CURVE_WINDOW_CLIPPED",
+              "the +/-{:g} year curve window was clipped to the training age range ({:g}-{:g} years)".format(
+                  (settings["age_window_requested"][1] - settings["age_window_requested"][0]) / 2,
+                  *settings["age_window_used"]))
+
     result_path = output_dir / result_filename(spec)
     write_result(result, result_path)
     log.info("wrote %s", result_path)
 
-    log.error("age curves are not implemented yet (Step 4)")
+    log.error("plots are not implemented yet (Step 5)")
     return 3
