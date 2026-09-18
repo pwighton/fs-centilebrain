@@ -27,7 +27,8 @@ def test_html_contains_table_values_and_flags():
     result = _result_with_curves()
     html = render_html(result)
     assert "8,000" in html and "6,500" in html            # volumes
-    assert "79th" in html and "3rd" in html                # percentiles
+    assert "0.79" in html and "0.03" in html               # percentiles as decimals
+    assert "Neuromorphometry report" in html and "not been approved by the FDA" in html
     assert 'class="side-l low"' in html and "↓" in html    # right thalamus flagged low
     assert "1 of 2 regions flagged" in html
     assert "+20.7" in html                                 # AI = 200*(8000-6500)/(14500)

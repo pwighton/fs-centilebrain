@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>CentileBrain report — {{ subject.id }}</title>
+<title>Neuromorphometry report — {{ subject.id }}</title>
 <style>
   @page {
     size: A4;
@@ -55,8 +55,12 @@
 </head>
 <body>
 
-<h1>CentileBrain subcortical volume report</h1>
-<div class="subtitle">Normative percentiles for FreeSurfer subcortical volumes, adjusted for age, sex and intracranial volume.</div>
+<h1>Neuromorphometry report</h1>
+<div class="subtitle">
+  Normative percentiles for FreeSurfer subcortical volumes, adjusted for age, sex and intracranial volume.<br>
+  Computed using normative models from centilebrain.org.<br>
+  This report is for informational or research use only and has not been approved by the FDA.
+</div>
 
 <table class="header">
   <tr><td class="k">Subject</td><td class="v"><b>{{ subject.id }}</b></td>
@@ -109,7 +113,7 @@
           <td>{{ e.p50_mm3|int }}</td>
           <td>{{ e.p10_mm3|int }}–{{ e.p90_mm3|int }}</td>
           <td class="{{ cls }}">{{ "%+.2f"|format(e.z) }}</td>
-          <td class="{{ cls }}">{{ e.percentile|ordinal }}</td>
+          <td class="{{ cls }}">{{ "%.2f"|format(e.percentile / 100) }}</td>
         {% else %}
           <td class="side-l">–</td><td>–</td><td>–</td><td>–</td><td>–</td>
         {% endif %}
@@ -124,23 +128,25 @@
   {{ flagged|length }} of {{ n_regions }} regions flagged; about {{ notes.expected_flags_healthy }} would be expected by chance in a healthy person.
 </div>
 
-<h2>How to read this</h2>
+<h2>Interpretation</h2>
 <ul class="notes">
   <li>The {{ band.mid }}th percentile is the volume the CentileBrain model predicts for a healthy {{ sex_word }} of this age with this intracranial volume.
       The {{ band.low }}th–{{ band.high }}th range is the model's Gaussian band around it (z = ±{{ "%.2f"|format(model.band_z[2]) }}).</li>
-  <li>z is the deviation from the prediction in units of the model's residual standard deviation; the percentile is 100·Φ(z).</li>
+  <li>z is the deviation from the prediction in units of the model's residual standard deviation; the percentile is Φ(z),
+      the fraction of the normative population expected to have a smaller volume (0.50 = median).</li>
   <li>AI is the left–right asymmetry index, 100·(L−R)/mean(L,R): the volume difference as a percent of the two sides' mean,
       positive when the left is larger. It is computed from the measured volumes only; CentileBrain provides no normative range for it.</li>
-  <li>The curves on the following pages hold intracranial volume fixed at the subject's value over the age window
+  <li>The normative plots on the following pages hold intracranial volume fixed at the subject's value over the age window
       {% if curve_settings %}{{ "%.0f"|format(curve_settings.age_window_used[0]) }}–{{ "%.0f"|format(curve_settings.age_window_used[1]) }} years{% endif %}.
       Intracranial volume is roughly stable in adulthood, less so in childhood.</li>
-  <li>The norms were built from {{ model.training_fs_versions|join(", ") }} FreeSurfer output, ages {{ "%.0f"|format(model.training_age_range[0]) }}–{{ "%.0f"|format(model.training_age_range[1]) }},
-      across many scanners; scanner and version effects are not corrected, they are part of the normative spread.</li>
-  <li>Research use only. This is not a diagnostic result.</li>
+  <li>The normative model was built from FreeSurfer outputs using versions {{ model.training_fs_versions[:-1]|join(", ") }} and {{ model.training_fs_versions[-1] }},
+      ages {{ "%.0f"|format(model.training_age_range[0]) }}–{{ "%.0f"|format(model.training_age_range[1]) }}, across many scanners;
+      scanner and version effects are not corrected, they are part of the normative spread.</li>
+  <li>For informational or research use only. This is not a diagnostic result.</li>
 </ul>
 
 <div class="page-break"></div>
-<h2>Volume against age</h2>
+<h2>Normative plots</h2>
 {% if legend_plot %}<div class="legend"><img src="{{ legend_plot }}" alt="legend"></div>{% endif %}
 <table class="plots">
   {% for s in structures %}

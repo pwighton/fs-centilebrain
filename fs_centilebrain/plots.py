@@ -66,7 +66,7 @@ def _draw_panel(ax, entry: dict, band: tuple, subject_age: float, show_ylabel: b
     color = FLAG if flag != "within" else INK
     ax.plot([subject_age], [entry["volume_mm3"]], marker=MARKER[flag], markersize=7, color=color,
             markeredgecolor="white", markeredgewidth=1.0, linestyle="none", zorder=5)
-    label = f"{entry['volume_mm3']:,.0f} mm³\n{_ordinal(entry['percentile'])} percentile"
+    label = f"{entry['volume_mm3']:,.0f} mm³\npercentile {entry['percentile'] / 100:.2f}"
     # Label beside the point, on whichever side has more room
     left_half = subject_age <= (ages[0] + ages[-1]) / 2
     ax.annotate(label, (subject_age, entry["volume_mm3"]), xytext=(8 if left_half else -8, 0),

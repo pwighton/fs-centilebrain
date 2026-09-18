@@ -26,9 +26,11 @@ def _fmt_int(value: float) -> str:
 
 def _fmt_date(iso: str) -> str:
     try:
-        return datetime.fromisoformat(iso).strftime("%Y-%m-%d %H:%M %Z").strip()
+        dt = datetime.fromisoformat(iso)
     except ValueError:
         return iso
+    zone = dt.strftime("%Z")
+    return f"{dt:%Y-%m-%d %H:%M} ({zone})" if zone else f"{dt:%Y-%m-%d %H:%M}"
 
 
 def _structures(result: dict) -> list:
