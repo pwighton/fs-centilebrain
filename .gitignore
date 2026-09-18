@@ -1,0 +1,21 @@
+# Upstream model files are downloaded at image build, never committed
+models/
+*.rds
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+.venv/
+
+# Scratch / local outputs
+scratch/
+*.log
+
+# Temporary implementation notes
+AGENTS.md
+20260917-fs-centilebrains-implementation.md
+docs/model-notes.md
