@@ -1,0 +1,14 @@
+.git
+.gitignore
+.pytest_cache
+__pycache__
+*.pyc
+*.egg-info
+build
+dist
+.venv
+scratch
+*.rds
+docs
+*.md
+!README.md

@@ -45,6 +45,17 @@ output/centilebrain.log
 centilebrain-report.pdf
 ```
 
+## Building and testing
+
+```
+docker build -t fs-centilebrain .
+docker run --rm --entrypoint pytest fs-centilebrain -q     # unit tests inside the image
+```
+
+The package can also be run outside the container (`pip install -e .[dev]`), in which case R must be
+on the `PATH` and the model files must be fetched with `tools/fetch_models.sh DIR` and pointed to with
+`--model-dir DIR` or `FS_CENTILEBRAIN_MODEL_DIR=DIR`.
+
 ## Model files
 
 The CentileBrain model files (`.rds`) are downloaded at image build time from a pinned commit of

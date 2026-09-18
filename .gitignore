@@ -1,6 +1,7 @@
 # Upstream model files are downloaded at image build, never committed
-models/
+# (models/checksums.sha256 is tracked)
 *.rds
+models/UPSTREAM_COMMIT
 
 # Python
 __pycache__/

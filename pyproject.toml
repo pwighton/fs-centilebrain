@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fs-centilebrain"
+version = "0.1.0"
+description = "Apply CentileBrain normative models to a FreeSurfer subject and produce a percentile report"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0",
+    "openpyxl>=3.1",
+    "matplotlib>=3.7",
+    "jinja2>=3.1",
+    "weasyprint>=60",
+    "jsonschema>=4.17",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+fs-centilebrain = "fs_centilebrain.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["fs_centilebrain*"]
+
+[tool.setuptools.package-data]
+fs_centilebrain = ["r/*.R", "data/*", "schema/*.json", "templates/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
