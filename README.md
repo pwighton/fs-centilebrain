@@ -55,3 +55,8 @@ this repository (upstream publishes no license).
 
 CentileBrain is provided by the ENIGMA Lifespan Working Group for research purposes. Nothing produced
 by this tool is a diagnostic result.
+
+## License
+
+This repository is released under the BSD 2-clause License (see `LICENSE`). The license covers the code and
+documentation here only.  The CentileBrain models remain subject to whatever terms their authors apply.
