@@ -18,8 +18,8 @@
 
   table.header { border-collapse: collapse; margin-bottom: 3mm; width: 100%; table-layout: fixed; }
   table.header td { padding: 0.6mm 3mm 0.6mm 0; vertical-align: top; overflow-wrap: anywhere; }
-  table.header td.k { color: #52514e; width: 15%; }
-  table.header td.v { width: 18.3%; }
+  table.header td.k { color: #52514e; width: 17%; }
+  table.header td.v { width: 33%; }
 
   .warnings { border: 0.6pt solid #d03b3b; border-radius: 1.5mm; padding: 2mm 3mm; margin: 3mm 0; }
   .warnings .title { color: #d03b3b; font-weight: bold; margin-bottom: 1mm; }
@@ -60,14 +60,15 @@
 
 <table class="header">
   <tr><td class="k">Subject</td><td class="v"><b>{{ subject.id }}</b></td>
-      <td class="k">Sex</td><td class="v">{{ sex_word }}</td>
-      <td class="k">Age</td><td class="v">{{ "%.1f"|format(subject.age) }} years</td></tr>
-  <tr><td class="k">Intracranial vol. (eTIV)</td><td class="v">{{ subject.icv_mm3|int }} mm³</td>
-      <td class="k">Scanner vendor</td><td class="v">{{ subject.vendor }}</td>
+      <td class="k">Scanner vendor</td><td class="v">{{ subject.vendor }}</td></tr>
+  <tr><td class="k">Sex</td><td class="v">{{ sex_word }}</td>
       <td class="k">FreeSurfer</td><td class="v">{{ subject.freesurfer_version }}</td></tr>
-  <tr><td class="k">Run</td><td class="v">{{ run_date }}</td>
-      <td class="k">Model</td><td class="v">CentileBrain {{ model.family }}, {{ sex_word }}</td>
+  <tr><td class="k">Age</td><td class="v">{{ "%.1f"|format(subject.age) }} years</td>
+      <td class="k">Model</td><td class="v">CentileBrain {{ model.family }}, {{ sex_word }}</td></tr>
+  <tr><td class="k">Intracranial vol. (eTIV)</td><td class="v">{{ subject.icv_mm3|int }} mm³</td>
       <td class="k">Tool</td><td class="v">fs-centilebrain {{ prov.tool_version }}</td></tr>
+  <tr><td class="k">Run</td><td class="v">{{ run_date }}</td>
+      <td class="k"></td><td class="v"></td></tr>
 </table>
 
 {% if warnings %}
