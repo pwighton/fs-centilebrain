@@ -13,8 +13,16 @@ models. Cortical thickness and surface area are planned.
 ## Intended usage
 
 ```
-docker run --rm --user $(id -u):$(id -g) -v /path/to/subjects:/subjects fs-centilebrain \
-  --subject-dir /subjects --subject bert --male --age 40 --vendor Siemens
+docker run \
+  --rm \
+  --user $(id -u):$(id -g) \
+  -v /path/to/subjects:/subjects \
+  fs-centilebrain \
+    --subject-dir /subjects \
+    --subject bert \
+    --male \
+    --age 40 \
+    --vendor Siemens
 ```
 
 | Option | Description |
