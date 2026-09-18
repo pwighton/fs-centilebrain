@@ -17,7 +17,7 @@ docker run \
   --rm \
   --user $(id -u):$(id -g) \
   -v /path/to/subjects:/subjects \
-  fs-centilebrain \
+  pwighton/fs-centilebrain:latest \
     --subject-dir /subjects \
     --subject bert \
     --male \
@@ -48,8 +48,10 @@ centilebrain-report.pdf
 ## Building and testing
 
 ```
-docker build -t fs-centilebrain .
-docker run --rm --entrypoint pytest fs-centilebrain -q     # unit tests inside the image
+make build     # builds pwighton/fs-centilebrain:<version> (version from pyproject.toml) and :latest
+make test      # builds, then runs the unit tests inside the image
+make push      # builds, then pushes both tags
+make version   # prints the version
 ```
 
 The package can also be run outside the container (`pip install -e .[dev]`), in which case R must be
