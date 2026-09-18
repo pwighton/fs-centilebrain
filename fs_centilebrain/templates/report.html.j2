@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CentileBrain report — {{ subject.id }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 15mm 18mm 15mm;
+    @bottom-left { content: "fs-centilebrain {{ prov.tool_version }} · {{ subject.id }}"; font-size: 7.5pt; color: #52514e; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 7.5pt; color: #52514e; }
+  }
+  html { font-family: "DejaVu Sans", sans-serif; font-size: 9pt; color: #0b0b0b; }
+  body { margin: 0; }
+  h1 { font-size: 15pt; margin: 0 0 2mm 0; }
+  h2 { font-size: 11pt; margin: 6mm 0 2mm 0; border-bottom: 0.4pt solid #c3c2b7; padding-bottom: 1mm; }
+  .subtitle { color: #52514e; margin-bottom: 4mm; }
+
+  table.header { border-collapse: collapse; margin-bottom: 3mm; width: 100%; table-layout: fixed; }
+  table.header td { padding: 0.6mm 3mm 0.6mm 0; vertical-align: top; overflow-wrap: anywhere; }
+  table.header td.k { color: #52514e; width: 15%; }
+  table.header td.v { width: 18.3%; }
+
+  .warnings { border: 0.6pt solid #d03b3b; border-radius: 1.5mm; padding: 2mm 3mm; margin: 3mm 0; }
+  .warnings .title { color: #d03b3b; font-weight: bold; margin-bottom: 1mm; }
+  .warnings ul { margin: 0; padding-left: 4mm; }
+  .warnings code { font-size: 8pt; }
+
+  table.results { border-collapse: collapse; width: 100%; font-size: 7.5pt; margin-top: 2mm; }
+  table.results th, table.results td { padding: 1.1mm 0.9mm; text-align: right; border-bottom: 0.3pt solid #e6e5e1; white-space: nowrap; }
+  table.results th { font-weight: normal; color: #52514e; border-bottom: 0.5pt solid #c3c2b7; }
+  table.results th.group { text-align: center; font-weight: bold; color: #0b0b0b; border-bottom: none; padding-bottom: 0; }
+  table.results th.side-l, table.results td.side-l { border-left: 0.5pt solid #c3c2b7; }
+  table.results td.name, table.results th.name { text-align: left; white-space: nowrap; }
+  table.results td.low { background: #fde9e9; color: #8f1d1d; font-weight: bold; }
+  table.results td.high { background: #e9f0fb; color: #123f7a; font-weight: bold; }
+  .flag-note { color: #52514e; font-size: 8pt; margin-top: 1.5mm; }
+
+  ul.notes { padding-left: 4mm; margin: 1mm 0; }
+  ul.notes li { margin-bottom: 1mm; }
+
+  .legend { text-align: center; margin: 2mm 0 1mm 0; }
+  .legend img { width: 170mm; }
+  table.plots { border-collapse: collapse; width: 100%; }
+  table.plots td { width: 50%; padding: 1mm; text-align: center; vertical-align: top; }
+  table.plots img { width: 84mm; }
+  table.plots tr { page-break-inside: avoid; }
+
+  .provenance { font-size: 7.5pt; color: #52514e; }
+  .provenance td { padding: 0.4mm 4mm 0.4mm 0; vertical-align: top; }
+  .provenance code { font-family: "DejaVu Sans Mono", monospace; font-size: 7pt; word-break: break-all; }
+  .footer-note { font-size: 7.5pt; color: #52514e; margin-top: 4mm; border-top: 0.4pt solid #c3c2b7; padding-top: 1.5mm; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<h1>CentileBrain subcortical volume report</h1>
+<div class="subtitle">Normative percentiles for FreeSurfer subcortical volumes, adjusted for age, sex and intracranial volume.</div>
+
+<table class="header">
+  <tr><td class="k">Subject</td><td class="v"><b>{{ subject.id }}</b></td>
+      <td class="k">Sex</td><td class="v">{{ sex_word }}</td>
+      <td class="k">Age</td><td class="v">{{ "%.1f"|format(subject.age) }} years</td></tr>
+  <tr><td class="k">Intracranial vol. (eTIV)</td><td class="v">{{ subject.icv_mm3|int }} mm³</td>
+      <td class="k">Scanner vendor</td><td class="v">{{ subject.vendor }}</td>
+      <td class="k">FreeSurfer</td><td class="v">{{ subject.freesurfer_version }}</td></tr>
+  <tr><td class="k">Run</td><td class="v">{{ run_date }}</td>
+      <td class="k">Model</td><td class="v">CentileBrain {{ model.family }}, {{ sex_word }}</td>
+      <td class="k">Tool</td><td class="v">fs-centilebrain {{ prov.tool_version }}</td></tr>
+</table>
+
+{% if warnings %}
+<div class="warnings">
+  <div class="title">Warnings</div>
+  <ul>
+  {% for w in warnings %}<li><code>{{ w.code }}</code> — {{ w.message }}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<h2>Results</h2>
+<table class="results">
+  <thead>
+    <tr>
+      <th class="name"></th>
+      <th class="group side-l" colspan="5">Left (mm³)</th>
+      <th class="group side-l" colspan="5">Right (mm³)</th>
+    </tr>
+    <tr>
+      <th class="name">Structure</th>
+      {% for side in ("L", "R") %}
+      <th class="side-l">Volume</th><th>{{ band.mid }}th</th><th>{{ band.low }}th–{{ band.high }}th</th><th>z</th><th>Pctl</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+  {% for s in structures %}
+    <tr>
+      <td class="name">{{ s.label }}</td>
+      {% for side in ("L", "R") %}
+        {% set e = s[side] %}
+        {% if e %}
+          {% set cls = e.flag if e.flag != "within" else "" %}
+          <td class="side-l {{ cls }}">{{ e.volume_mm3|int }}{% if e.flag == "low" %} ↓{% elif e.flag == "high" %} ↑{% endif %}</td>
+          <td>{{ e.p50_mm3|int }}</td>
+          <td>{{ e.p10_mm3|int }}–{{ e.p90_mm3|int }}</td>
+          <td class="{{ cls }}">{{ "%+.2f"|format(e.z) }}</td>
+          <td class="{{ cls }}">{{ e.percentile|ordinal }}</td>
+        {% else %}
+          <td class="side-l">–</td><td>–</td><td>–</td><td>–</td><td>–</td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<div class="flag-note">
+  Highlighted: below the {{ band.low }}th percentile (↓) or above the {{ band.high }}th (↑).
+  {{ flagged|length }} of {{ n_regions }} regions flagged; about {{ notes.expected_flags_healthy }} would be expected by chance in a healthy person.
+</div>
+
+<h2>How to read this</h2>
+<ul class="notes">
+  <li>The {{ band.mid }}th percentile is the volume the CentileBrain model predicts for a healthy {{ sex_word }} of this age with this intracranial volume.
+      The {{ band.low }}th–{{ band.high }}th range is the model's Gaussian band around it (z = ±{{ "%.2f"|format(model.band_z[2]) }}).</li>
+  <li>z is the deviation from the prediction in units of the model's residual standard deviation; the percentile is 100·Φ(z).</li>
+  <li>The curves on the following pages hold intracranial volume fixed at the subject's value over the age window
+      {% if curve_settings %}{{ "%.0f"|format(curve_settings.age_window_used[0]) }}–{{ "%.0f"|format(curve_settings.age_window_used[1]) }} years{% endif %}.
+      Intracranial volume is roughly stable in adulthood, less so in childhood.</li>
+  <li>The norms were built from {{ model.training_fs_versions|join(", ") }} FreeSurfer output, ages {{ "%.0f"|format(model.training_age_range[0]) }}–{{ "%.0f"|format(model.training_age_range[1]) }},
+      across many scanners; scanner and version effects are not corrected, they are part of the normative spread.</li>
+  <li>Research use only. This is not a diagnostic result.</li>
+</ul>
+
+<div class="page-break"></div>
+<h2>Volume against age</h2>
+{% if legend_plot %}<div class="legend"><img src="{{ legend_plot }}" alt="legend"></div>{% endif %}
+<table class="plots">
+  {% for s in structures %}
+  <tr>
+    <td>{% if s.L and s.L.plot %}<img src="{{ s.L.plot }}" alt="{{ s.label }} left">{% endif %}</td>
+    <td>{% if s.R and s.R.plot %}<img src="{{ s.R.plot }}" alt="{{ s.label }} right">{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<div class="footer-note">
+  <table class="provenance">
+    <tr><td>Model</td><td><code>{{ model.model_file }}</code> sha256 <code>{{ model.model_sha256 }}</code></td></tr>
+    <tr><td>Upstream</td><td><code>{{ model.upstream_repo }}</code> @ <code>{{ model.upstream_commit }}</code>; centering offsets from <code>{{ model.offsets_source }}</code>{% if not model.offsets_exact %} (approximate){% endif %}</td></tr>
+    <tr><td>Software</td><td>fs-centilebrain {{ prov.tool_version }}{% if prov.tool_git_sha %} (<code>{{ prov.tool_git_sha }}</code>){% endif %}{% if prov.container_image %}, image <code>{{ prov.container_image }}</code>{% endif %}; {{ prov.r_version }}; Python {{ prov.python_version }}</td></tr>
+    <tr><td>Input</td><td><code>{{ subject.subject_dir }}</code>{% if subject.freesurfer_build_stamp %}, build stamp <code>{{ subject.freesurfer_build_stamp }}</code>{% endif %}</td></tr>
+  </table>
+</div>
+
+</body>
+</html>

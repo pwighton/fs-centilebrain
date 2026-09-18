@@ -15,6 +15,7 @@ from .freesurfer import freesurfer_version, parse_aseg_stats, read_build_stamp, 
 from .inputs import build_input_row, write_input_files
 from .measures import MEASURE_SPECS
 from .plots import render_plots
+from .report import render_report
 from .results import (build_result, model_block, provenance, region_entries, result_filename,
                       write_result)
 from .scoring import SEX_NAME, load_offsets, model_path, score_cases, write_website_format
@@ -129,5 +130,7 @@ def run_pipeline(args: argparse.Namespace) -> int:
     write_result(result, result_path)
     log.info("wrote %s", result_path)
 
-    log.error("the PDF report is not implemented yet (Step 6)")
-    return 3
+    # --- Step 6: PDF report (from the JSON only) ------------------------------------
+    pdf_path = render_report(result_path)
+    log.info("done: %s", pdf_path)
+    return 0

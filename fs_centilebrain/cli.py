@@ -89,7 +89,14 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     try:
         if args.command == "report":
-            raise CliError("the report subcommand is not implemented yet (Step 6)")
+            if not args.result_json.is_file():
+                raise CliError(f"result JSON not found: {args.result_json}")
+            import logging
+
+            from .report import render_report
+            logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+            render_report(args.result_json, args.output)
+            return 0
         validate_run_args(args)
         from .pipeline import run_pipeline
         return run_pipeline(args)

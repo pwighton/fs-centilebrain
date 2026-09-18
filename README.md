@@ -40,9 +40,18 @@ input/centilebrain-input-subcortical.csv     values extracted from aseg.stats
 input/centilebrain-input-subcortical.xlsx    same, in the format accepted by centilebrain.org
 output/centilebrain-subcortical.json         all results (z, percentiles, curves, provenance)
 output/prediction_SubcorticalVolume_<sex>.csv, zscore_SubcorticalVolume_<sex>.csv   website-format
-output/plots/<region>.png
+output/plots/<structure>-<left|right>.png, output/plots/legend.png
+output/centilebrain-report.html               same content as the PDF
 output/centilebrain.log
 centilebrain-report.pdf
+```
+
+The PDF is rendered from `output/centilebrain-subcortical.json` alone, so it can be regenerated
+(for example after a layout change) without re-running the model:
+
+```
+docker run --rm --user $(id -u):$(id -g) -v /path/to/subjects:/subjects pwighton/fs-centilebrain:latest \
+  report /subjects/bert/centilebrain/output/centilebrain-subcortical.json
 ```
 
 ## Building and testing
