@@ -61,7 +61,7 @@ def build_parser() -> argparse.ArgumentParser:
     report = sub.add_parser("report", help="re-render the PDF report from an existing result JSON")
     report.add_argument("result_json", type=Path, metavar="RESULT.json")
     report.add_argument("-o", "--output", type=Path, metavar="PDF",
-                        help="where to write the PDF (default: next to the JSON, as centilebrain-report.pdf)")
+                        help="where to write the PDF (default: next to the JSON, as normative-neuromorphometry-report--subject-<id>.pdf)")
     return parser
 
 

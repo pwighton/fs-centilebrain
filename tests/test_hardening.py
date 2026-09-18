@@ -93,7 +93,7 @@ def test_full_run_then_rerun_overwrites_and_truncates_log(tmp_path):
     argv = ["-sd", str(tmp_path), "-s", "sub", "--female", "-a", "95", "--model-dir", str(MODEL_DIR)]
     assert main(argv) == 0
     out = subj / "centilebrain"
-    assert (out / "centilebrain-report.pdf").is_file()
+    assert (out / "normative-neuromorphometry-report--subject-sub.pdf").is_file()
     result = json.loads((out / "output" / "centilebrain-subcortical.json").read_text())
     assert set(_codes(result["warnings"])) == {"RECON_ALL_NOT_DONE", "AGE_OUT_OF_RANGE", "CURVE_WINDOW_CLIPPED"}
     assert result["curve_settings"]["age_window_used"][1] <= 90.06

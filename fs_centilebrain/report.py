@@ -11,7 +11,8 @@ from .results import read_result
 
 log = logging.getLogger("fs_centilebrain")
 
-REPORT_BASENAME = "centilebrain-report"
+def report_basename(subject_id: str) -> str:
+    return f"normative-neuromorphometry-report--subject-{subject_id}"
 
 
 def _ordinal(value: float) -> str:
@@ -76,7 +77,8 @@ def render_html(result: dict) -> str:
 
 
 def render_report(result_path: Path, pdf_path: Path = None) -> Path:
-    """Read the result JSON, write <output_dir>/centilebrain-report.html and the PDF.
+    """Read the result JSON, write the HTML next to it and the PDF one level up
+    (<subject>/centilebrain/normative-neuromorphometry-report--subject-<id>.pdf by default).
 
     Plot paths in the JSON are relative to the JSON's directory, which is used as the
     base URL for both the HTML and the PDF.
@@ -88,11 +90,12 @@ def render_report(result_path: Path, pdf_path: Path = None) -> Path:
     result_path = Path(result_path)
     result = read_result(result_path)
     output_dir = result_path.parent
+    basename = report_basename(result["subject"]["id"])
     if pdf_path is None:
-        pdf_path = output_dir.parent / f"{REPORT_BASENAME}.pdf"
+        pdf_path = output_dir.parent / f"{basename}.pdf"
 
     html = render_html(result)
-    html_path = output_dir / f"{REPORT_BASENAME}.html"
+    html_path = output_dir / f"{basename}.html"
     html_path.write_text(html)
     log.info("wrote %s", html_path)
 

@@ -5,7 +5,7 @@ single FreeSurfer subject. Produces percentile estimates, ICV-adjusted age curve
 without uploading anything to centilebrain.org.
 
 Scope: subcortical volumes (14 regions from `aseg.stats`), sex-specific models. Cortical thickness and
-surface area are planned.
+surface area currently not implemented.
 
 ## Usage
 
@@ -53,9 +53,9 @@ input/centilebrain-input-subcortical.xlsx    same, in the format accepted by cen
 output/centilebrain-subcortical.json         all results (z, percentiles, asymmetry, curves, warnings, provenance)
 output/prediction_SubcorticalVolume_<sex>.csv, zscore_SubcorticalVolume_<sex>.csv   website-format
 output/plots/<structure>-<left|right>.png, output/plots/legend.png
-output/centilebrain-report.html              same content as the PDF
+output/normative-neuromorphometry-report--subject-<subject>.html              same content as the PDF
 output/centilebrain.log
-centilebrain-report.pdf
+normative-neuromorphometry-report--subject-<subject>.pdf
 ```
 
 The PDF is rendered from `output/centilebrain-subcortical.json` alone, so it can be regenerated
@@ -100,9 +100,10 @@ docker run --rm --user $(id -u):$(id -g) -v /path/to/subjects:/subjects pwighton
   reasonable approximation in adulthood, less so in childhood.
 - **Asymmetry index.** AI = 100·(L−R)/mean(L,R), i.e. 200·(L−R)/(L+R), in percent; positive when the left is
   larger. It is computed from the measured volumes only; CentileBrain provides no normative range for it.
-- **Scanner and FreeSurfer version.** The norms were built from many scanners and FreeSurfer 4.5–7.1. Nothing
-  is corrected for the subject's scanner or version; those effects are part of the normative spread. Output from
-  newer FreeSurfer versions (7.2+, 8.x) has not been validated against these norms.
+- **Scanner and FreeSurfer version.** The normmative models were built from
+  [data from many scanners and version of FreeSurfer (4.5–7.1)](https://docs.google.com/spreadsheets/d/1d-1bfKskhPSkfFnZXA68h9S7Lla6NRVU/edit?gid=1788754223#gid=1788754223). 
+  No correction is performed for the subject's scanner or version; those effects
+  are part of the normative spread. Output from newer FreeSurfer versions (7.2+, 8.x) has not been validated against these norms.
 - **Measurement error** in the subject's own volumes (FreeSurfer test–retest variability) is not accounted for
   and is the dominant uncertainty for an individual percentile.
 
